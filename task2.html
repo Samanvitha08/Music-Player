@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web-based Music Player</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+
+        .player {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            width: 300px;
+            text-align: center;
+        }
+
+        .player-controls button {
+            margin: 5px;
+            padding: 10px 20px;
+            border: none;
+            background: #007bff;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .volume-control {
+            margin: 20px 0;
+        }
+
+        #playlist {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #playlist li {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #playlist li:hover {
+            background: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="player">
+        <div class="player-controls">
+            <button id="prev">Prev</button>
+            <button id="play-pause">Play</button>
+            <button id="next">Next</button>
+        </div>
+        <div class="volume-control">
+            <label for="volume">Volume</label>
+            <input type="range" id="volume" min="0" max="1" step="0.1" value="0.5">
+        </div>
+        <div class="playlist">
+            <input type="text" id="search" placeholder="Search music...">
+            <ul id="playlist">
+                <!-- Playlist items will be dynamically added here -->
+            </ul>
+        </div>
+    </div>
+    <audio id="audio-player" src=""></audio>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const audioPlayer = document.getElementById('audio-player');
+            const playPauseBtn = document.getElementById('play-pause');
+            const prevBtn = document.getElementById('prev');
+            const nextBtn = document.getElementById('next');
+            const volumeControl = document.getElementById('volume');
+            const searchInput = document.getElementById('search');
+            const playlistElement = document.getElementById('playlist');
+
+            let currentTrackIndex = 0;
+            let isPlaying = false;
+
+            const playlist = [
+                { title: "Song 1", src: "songs/song1.mp3" },
+                { title: "Song 2", src: "songs/song2.mp3" },
+                { title: "Song 3", src: "songs/song3.mp3" }
+            ];
+
+            function loadTrack(index) {
+                audioPlayer.src = playlist[index].src;
+                audioPlayer.load();
+                updatePlaylist();
+            }
+
+            function playTrack() {
+                audioPlayer.play();
+                isPlaying = true;
+                playPauseBtn.textContent = 'Pause';
+            }
+
+            function pauseTrack() {
+                audioPlayer.pause();
+                isPlaying = false;
+                playPauseBtn.textContent = 'Play';
+            }
+
+            function updatePlaylist() {
+                playlistElement.innerHTML = '';
+                playlist.forEach((track, index) => {
+                    const li = document.createElement('li');
+                    li.textContent = track.title;
+                    li.className = index === currentTrackIndex ? 'active' : '';
+                    li.addEventListener('click', () => {
+                        currentTrackIndex = index;
+                        loadTrack(currentTrackIndex);
+                        playTrack();
+                    });
+                    playlistElement.appendChild(li);
+                });
+            }
+
+            playPauseBtn.addEventListener('click', () => {
+                if (isPlaying) {
+                    pauseTrack();
+                } else {
+                    playTrack();
+                }
+            });
+
+            prevBtn.addEventListener('click', () => {
+                currentTrackIndex = (currentTrackIndex > 0) ? currentTrackIndex - 1 : playlist.length - 1;
+                loadTrack(currentTrackIndex);
+                playTrack();
+            });
+
+            nextBtn.addEventListener('click', () => {
+                currentTrackIndex = (currentTrackIndex < playlist.length - 1) ? currentTrackIndex + 1 : 0;
+                loadTrack(currentTrackIndex);
+                playTrack();
+            });
+
+            volumeControl.addEventListener('input', (e) => {
+                audioPlayer.volume = e.target.value;
+            });
+
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredPlaylist = playlist.filter(track => track.title.toLowerCase().includes(searchTerm));
+                updatePlaylist(filteredPlaylist);
+            });
+
+            loadTrack(currentTrackIndex);
+        });
+    </script>
+</body>
+</html>
